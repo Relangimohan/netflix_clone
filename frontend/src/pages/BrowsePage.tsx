@@ -3,14 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { GoogleGenAI, Type } from '@google/genai';
-import { Header } from '../components/Header';
+import { Header } from '../components/Header'; // Assuming Header is still used for UI
 import { HeroBanner } from '../components/HeroBanner';
 import { ContentRow } from '../components/ContentRow';
+import { mockContent } from '../data/mockData';
 import { VideoPlayerModal } from '../components/VideoPlayerModal';
 
 
 interface ContentItem {
+    // _id is optional for static data, but kept for consistency with previous structure
     _id: string;
     title: string;
     posterUrl: string;
@@ -45,7 +46,7 @@ export const BrowsePage = ({ onLogout }: BrowsePageProps) => {
     const [selectedVideoUrl, setSelectedVideoUrl] = useState<string | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<string>('All');
     const [searchQuery, setSearchQuery] = useState('');
-    const [isSearching, setIsSearching] = useState(false);
+    // isSearching state removed as client-side search is synchronous
     const debounceTimeout = useRef<number | null>(null);
 
     const processContentData = useCallback((data: ContentItem[]) => {
@@ -70,11 +71,9 @@ export const BrowsePage = ({ onLogout }: BrowsePageProps) => {
     const fetchContent = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await fetch('/api/content');
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const data: ContentItem[] = await response.json();
+            // Use static mock data instead of fetching from API
+            const data: ContentItem[] = mockContent;
+
             setMasterContentList(data);
             setFilteredContentList(data);
             
@@ -110,67 +109,16 @@ export const BrowsePage = ({ onLogout }: BrowsePageProps) => {
         return Array.from(categories).sort();
     }, [masterContentList]);
 
-    const handleAiSearch = async (query: string) => {
+    // Client-side search function
+    const handleClientSearch = (query: string) => {
         if (!query) {
             setFilteredContentList(masterContentList);
             return;
         }
 
-        setIsSearching(true);
         setError(null);
 
         try {
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
-
-            const contentForPrompt = masterContentList.map(item => ({
-                title: item.title,
-                description: item.description,
-                category: item.category,
-            }));
-
-            const prompt = `You are a helpful search assistant for a streaming service called 'mana studio'.
-A user is searching for: "${query}".
-Here is the available content library:
-${JSON.stringify(contentForPrompt)}
-
-Based on the user's search query, identify the most relevant items. Consider the title, description, and category.
-Return a JSON object with a single key "relevant_titles" which is an array of strings, containing only the titles of the relevant items.
-For example: { "relevant_titles": ["Kalki 2898 AD Trailer", "What Is Generative AI?"] }.
-If no items are relevant, return an empty array for "relevant_titles".`;
-
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: prompt,
-                config: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: Type.OBJECT,
-                        properties: {
-                            relevant_titles: {
-                                type: Type.ARRAY,
-                                items: {
-                                    type: Type.STRING
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            
-            const resultText = response.text.trim();
-            const result = JSON.parse(resultText);
-
-            if (result && result.relevant_titles) {
-                const relevantTitles = new Set(result.relevant_titles);
-                const filteredContent = masterContentList.filter(item => relevantTitles.has(item.title));
-                setFilteredContentList(filteredContent);
-            } else {
-                 setFilteredContentList([]);
-            }
-
-        } catch (e) {
-            console.error("AI search failed:", e);
-            setError("AI search failed. Falling back to simple text search.");
             const lowerCaseQuery = query.toLowerCase();
             const filteredContent = masterContentList.filter(item =>
                 item.title.toLowerCase().includes(lowerCaseQuery) ||
@@ -178,8 +126,10 @@ If no items are relevant, return an empty array for "relevant_titles".`;
                 item.category.toLowerCase().includes(lowerCaseQuery)
             );
             setFilteredContentList(filteredContent);
-        } finally {
-            setIsSearching(false);
+        } catch (e) {
+            console.error("Client-side search failed:", e);
+            setError("Client-side search failed.");
+            setFilteredContentList([]);
         }
     };
     
@@ -188,8 +138,8 @@ If no items are relevant, return an empty array for "relevant_titles".`;
         if (debounceTimeout.current) {
             clearTimeout(debounceTimeout.current);
         }
-        debounceTimeout.current = window.setTimeout(() => {
-            handleAiSearch(query);
+        debounceTimeout.current = window.setTimeout(() => { // Debounce for better UX
+            handleClientSearch(query);
         }, 500); // 500ms debounce delay
     };
 
@@ -217,7 +167,7 @@ If no items are relevant, return an empty array for "relevant_titles".`;
                 onLogout={onLogout} 
                 searchQuery={searchQuery}
                 onSearchChange={handleSearchChange}
-                isSearching={isSearching}
+                isSearching={false} // No longer performing async search
                 categories={allCategories}
                 selectedCategory={selectedCategory}
                 onCategoryChange={setSelectedCategory}
@@ -233,7 +183,7 @@ If no items are relevant, return an empty array for "relevant_titles".`;
                         onPosterClick={handlePosterClick}
                     />
                 )) : (
-                    !isSearching && (searchQuery || selectedCategory !== 'All') && <div>No results found.</div>
+                    (searchQuery || selectedCategory !== 'All') && <div>No results found.</div>
                 )}
             </main>
             {selectedVideoUrl && (

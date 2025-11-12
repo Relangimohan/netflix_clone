@@ -35,26 +35,10 @@ export const AuthPage = ({ onAuthSuccess }: AuthPageProps) => {
 
         const endpoint = isRegistering ? '/api/auth/register' : '/api/auth/login';
 
-        try {
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-            });
-
-            const data: AuthResponse = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.message || 'An error occurred.');
-            }
-
-            if (data.token && data.user) {
-                onAuthSuccess(data);
-            }
-
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'An unknown error occurred');
-        }
+        // --- Simulating a successful login for static demo ---
+        console.log(`Simulating ${isRegistering ? 'registration' : 'login'} for ${email}`);
+        // In a real app, you would get the user and token from the backend.
+        onAuthSuccess({ token: 'fake-jwt-token', user: { _id: '123', email: email } });
     };
 
     return (

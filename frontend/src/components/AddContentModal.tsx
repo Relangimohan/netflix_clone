@@ -22,24 +22,26 @@ export const AddContentModal = ({ onClose, onContentAdded }: AddContentModalProp
             return;
         }
 
-        try {
-            const response = await fetch('/api/content', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ title, posterUrl, category }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to add content');
-            }
-
-            onContentAdded(); // Callback to refresh content list
-            onClose(); // Close the modal
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'An unknown error occurred');
-        }
+        // --- Backend connection disabled for static demo ---
+        setError('Adding content is disabled in this demo version.');
+        // try {
+        //     const response = await fetch('/api/content', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body: JSON.stringify({ title, posterUrl, category }),
+        //     });
+        //
+        //     if (!response.ok) {
+        //         throw new Error('Failed to add content');
+        //     }
+        //
+        //     onContentAdded(); // Callback to refresh content list
+        //     onClose(); // Close the modal
+        // } catch (err) {
+        //     setError(err instanceof Error ? err.message : 'An unknown error occurred');
+        // }
     };
 
     return (

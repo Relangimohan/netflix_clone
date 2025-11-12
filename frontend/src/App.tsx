@@ -2,51 +2,31 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AuthPage } from './pages/AuthPage';
 import { BrowsePage } from './pages/BrowsePage';
 
 interface User {
-    _id: string;
+    // A simple user object for the demo
     email: string;
-}
-
-interface AuthData {
-    token: string;
-    user: User;
 }
 
 // Main App Component
 export const App = () => {
-    const [authData, setAuthData] = useState<AuthData | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState<User | null>(null);
 
-    useEffect(() => {
-        // Check for token in local storage on initial load
-        const token = localStorage.getItem('token');
-        const userString = localStorage.getItem('user');
-        if (token && userString) {
-            const user = JSON.parse(userString);
-            setAuthData({ token, user });
-        }
-        setLoading(false);
-    }, []);
-
-    const handleAuthSuccess = (newAuthData: AuthData) => {
-        localStorage.setItem('token', newAuthData.token);
-        localStorage.setItem('user', JSON.stringify(newAuthData.user));
-        setAuthData(newAuthData);
+    const handleAuthSuccess = (authData: { user: User }) => {
+        setUser(authData.user);
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setAuthData(null);
+        setUser(null);
+        console.log('User logged out.');
     };
     
-    if (loading) {
-        return <div>Loading...</div>; // Or a proper spinner
-    }
-
-    return authData ? <BrowsePage onLogout={handleLogout} /> : <AuthPage onAuthSuccess={handleAuthSuccess} />;
+    return user ? (
+        <BrowsePage onLogout={handleLogout} />
+    ) : (
+        <AuthPage onAuthSuccess={handleAuthSuccess} />
+    );
 };
