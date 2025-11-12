@@ -2,14 +2,14 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 interface AddContentModalProps {
     onClose: () => void;
-    onContentAdded: () => void;
+    // onContentAdded is not used in the static demo as backend calls are commented out
 }
 
-export const AddContentModal = ({ onClose, onContentAdded }: AddContentModalProps) => {
+export const AddContentModal = ({ onClose }: AddContentModalProps) => {
     const [title, setTitle] = useState('');
     const [posterUrl, setPosterUrl] = useState('');
     const [category, setCategory] = useState('');

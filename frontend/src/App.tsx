@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AuthPage } from './pages/AuthPage';
 import { BrowsePage } from './pages/BrowsePage';
 
@@ -15,7 +15,7 @@ interface User {
 export const App = () => {
     const [user, setUser] = useState<User | null>(null);
 
-    const handleAuthSuccess = (authData: { user: User }) => {
+    const handleAuthSuccess = (authData: { token: string; user: User }) => {
         setUser(authData.user);
     };
 

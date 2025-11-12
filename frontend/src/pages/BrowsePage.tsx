@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Header } from '../components/Header'; // Assuming Header is still used for UI
 import { HeroBanner } from '../components/HeroBanner';
 import { ContentRow } from '../components/ContentRow';

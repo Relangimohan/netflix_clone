@@ -2,18 +2,14 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { TypingLogo } from '../components/TypingLogo';
 
 interface User {
     _id: string;
     email: string;
 }
-interface AuthResponse {
-    token: string;
-    user: User;
-    message?: string;
-}
+
 interface AuthPageProps {
     onAuthSuccess: (authData: { token: string; user: User }) => void;
 }
@@ -32,8 +28,6 @@ export const AuthPage = ({ onAuthSuccess }: AuthPageProps) => {
             setError('Please enter email and password.');
             return;
         }
-
-        const endpoint = isRegistering ? '/api/auth/register' : '/api/auth/login';
 
         // --- Simulating a successful login for static demo ---
         console.log(`Simulating ${isRegistering ? 'registration' : 'login'} for ${email}`);
