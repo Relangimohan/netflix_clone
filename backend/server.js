@@ -4,6 +4,7 @@
  */
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const connectDB = require('./config/db');
 require('dotenv').config();
 
@@ -21,9 +22,12 @@ app.use(express.json());
 app.use('/api', require('./routes/api'));
 app.use('/api/auth', require('./routes/auth'));
 
+// Serve static files from the React frontend build directory
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
-app.get('/', (req, res) => {
-    res.send('mana studio Backend is running!');
+// For any request that doesn't match an API route, send back the frontend's index.html file
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/dist', 'index.html'));
 });
 
 app.listen(PORT, () => {
